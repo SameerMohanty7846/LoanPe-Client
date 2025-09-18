@@ -1,41 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 const ViewLoans = () => {
+  const [loans, setLoans] = useState([]); 
   const [selectedLoan, setSelectedLoan] = useState(null);
   const [showApplyModal, setShowApplyModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
 
-  // Sample loan data
-  const loanTypes = [
-    {
-      id: 1,
-      name: "Personal Loan",
-      interestRate: "8.5% - 12%",
-      amount: "Up to $50,000",
-      term: "1-5 years",
-      features: ["No collateral required", "Quick approval", "Flexible repayment"],
-      tag: "Low Rate"
-    },
-    {
-      id: 2,
-      name: "Home Loan",
-      interestRate: "6.2% - 8%",
-      amount: "Up to $2M",
-      term: "15-30 years",
-      features: ["Fixed & adjustable rates", "Low down payment", "Pre-approval available"],
-      tag: "Popular"
-    },
-    {
-      id: 3,
-      name: "Auto Loan",
-      interestRate: "4.5% - 7%",
-      amount: "Up to $100,000",
-      term: "2-7 years",
-      features: ["New & used cars", "Online application", "Gap insurance"],
-      tag: "Fast Approval"
-    }
-    // ... other loans
-  ];
+  // ✅ Fetch only real backend fields
+  useEffect(() => {
+    const fetchLoans = async () => {
+      try {
+        const res = await axios.get('http://localhost:7777/loanpe/loans/allloans');
+        if (res.data.status === 'success') {
+          const mappedLoans = res.data.data.map((loan) => ({
+            id: loan._id,
+            name: loan.productName,
+            interestRate: `${loan.interestRate}%`,
+            term: `${loan.duration} months`,
+            description: loan.description,
+            eligibility: loan.eligibilityCriteria,
+            tag: loan.isActive ? 'Active' : 'Inactive'
+          }));
+          setLoans(mappedLoans);
+        }
+      } catch (err) {
+        console.error('Error fetching loans:', err);
+      }
+    };
+    fetchLoans();
+  }, []);
 
   const openApplyModal = (loan) => {
     setSelectedLoan(loan);
@@ -66,7 +60,7 @@ const ViewLoans = () => {
 
         {/* Loan Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {loanTypes.map((loan) => (
+          {loans.map((loan) => (
             <div 
               key={loan.id} 
               className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200 overflow-hidden border border-gray-100"
@@ -85,41 +79,22 @@ const ViewLoans = () => {
                   </div>
                 </div>
 
-                {/* Interest Rate and Amount */}
+                {/* Interest Rate and Term */}
                 <div className="grid grid-cols-2 gap-4 mb-4">
                   <div className="bg-blue-50 p-3 rounded-lg">
                     <p className="text-xs text-gray-600">Interest Rate</p>
                     <p className="text-lg font-bold text-blue-600">{loan.interestRate}</p>
                   </div>
                   <div className="bg-purple-50 p-3 rounded-lg">
-                    <p className="text-xs text-gray-600">Max Amount</p>
-                    <p className="text-md font-semibold text-purple-600">{loan.amount}</p>
+                    <p className="text-xs text-gray-600">Loan Term</p>
+                    <p className="text-md font-semibold text-purple-600">{loan.term}</p>
                   </div>
                 </div>
 
-                {/* Features */}
+                {/* Description */}
                 <div className="mb-4">
-                  <p className="text-sm font-medium text-gray-700 mb-2">Key Features:</p>
-                  <ul className="space-y-1">
-                    {loan.features.map((feature, index) => (
-                      <li key={index} className="flex items-center text-sm text-gray-600">
-                        <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {/* Term and Processing */}
-                <div className="flex justify-between text-sm text-gray-600 mb-6">
-                  <div>
-                    <p className="text-gray-500">Loan Term</p>
-                    <p className="font-medium">{loan.term}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-gray-500">Processing</p>
-                    <p className="font-medium">1-3 days</p>
-                  </div>
+                  <p className="text-sm font-medium text-gray-700 mb-2">Description:</p>
+                  <p className="text-sm text-gray-600">{loan.description}</p>
                 </div>
 
                 {/* Action Buttons */}
@@ -180,16 +155,8 @@ const ViewLoans = () => {
               </button>
               <h2 className="text-2xl font-bold text-gray-800 mb-4">{selectedLoan.name} Details</h2>
               <p className="text-gray-600 mb-2"><strong>Interest Rate:</strong> {selectedLoan.interestRate}</p>
-              <p className="text-gray-600 mb-2"><strong>Max Amount:</strong> {selectedLoan.amount}</p>
               <p className="text-gray-600 mb-2"><strong>Term:</strong> {selectedLoan.term}</p>
-              <div className="mb-4">
-                <p className="font-medium text-gray-700">Features:</p>
-                <ul className="list-disc ml-6 text-gray-600">
-                  {selectedLoan.features.map((f, i) => (
-                    <li key={i}>{f}</li>
-                  ))}
-                </ul>
-              </div>
+              <p className="text-gray-600 mb-4"><strong>Description:</strong> {selectedLoan.description}</p>
               <button 
                 onClick={() => { closeModals(); openApplyModal(selectedLoan); }} 
                 className="w-full bg-gradient-to-r from-purple-600 to-blue-500 text-white py-2 rounded-lg font-medium">
@@ -198,15 +165,6 @@ const ViewLoans = () => {
             </div>
           </div>
         )}
-
-        {/* Help Section */}
-        <div className="mt-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl p-6 text-center text-white">
-          <h2 className="text-xl font-bold mb-2">Need Help Choosing?</h2>
-          <p className="mb-4 opacity-90">Our loan specialists are ready to help you find the perfect loan option</p>
-          <button className="bg-white text-purple-600 hover:bg-gray-100 font-medium py-2 px-6 rounded-lg transition-all duration-200">
-            Contact a Loan Advisor
-          </button>
-        </div>
       </div>
     </div>
   );
