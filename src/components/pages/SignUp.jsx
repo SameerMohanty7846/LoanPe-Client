@@ -1,13 +1,14 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-
+import axios from 'axios';
 const SignUp = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
-    password: ''
+    password: '',
+    role:'user'
   });
   const navigate = useNavigate();
 
@@ -19,28 +20,25 @@ const SignUp = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+   try{
+     const response=await axios.post("http://localhost:7777/loanpe/users/register",
+      formData,
+      {withCredentials:true}
+    )
 
-    // // Check email and set role
-    // if (formData.email === 'admin@gmail.com') {
-    //   localStorage.setItem('role', 'admin');
-    //   localStorage.setItem('isAuthenticated', 'true');
-    //   localStorage.setItem('userName', formData.name);
-    //   navigate('/admin/dashboard');
-    // } else if (formData.email === 'user@gmail.com') {
-    //   localStorage.setItem('role', 'user');
-    //   localStorage.setItem('isAuthenticated', 'true');
-    //   localStorage.setItem('userName', formData.name);
-    //   navigate('/user/dashboard');
-    // } else {
-    //   localStorage.setItem('role', 'user');
-    //   localStorage.setItem('isAuthenticated', 'true');
-    //   localStorage.setItem('userName', formData.name);
-    //   navigate('/user/dashboard');
-    // }
+    console.log("Registration Successfully:",response.data);
+    alert('Account created successfully!');
+    navigate('/login')
 
-    console.log('SignUp form submitted:', formData);
+   }catch(error){
+     console.error("Registration Failed ",error);
+     alert(error.response ?.data ?.message || 'Something went wrong')
+   }
+
+
+   
   };
 
   return (

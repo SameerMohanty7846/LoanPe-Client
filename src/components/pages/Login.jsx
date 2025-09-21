@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+import axios from 'axios';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -17,27 +18,46 @@ const Login = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log(formData);
+    try {
+      const response = await axios.post("http://localhost:7777/loanpe/users/login",
+        formData,
+        {
+          withCredentials: true
+        }
+      )
 
-    // Check email and set role
-    if (formData.email === 'admin@gmail.com') {
-      localStorage.setItem('role', 'admin');
-      navigate('/admin/admindashboard'); // Redirect to admin dashboard
-    } else if (formData.email === 'user@gmail.com') {
-      localStorage.setItem('role', 'user');
-      navigate('/user/userdashboard'); // Redirect to user dashboard
-    } else {
-      // Handle other cases or show error
+      const { user } = response.data;
+      const role = user.role;
+
+      localStorage.setItem('role',role);
+
+      if (role === 'admin') {
+        navigate('/admin/admindashboard');
+      } else {
+        navigate('/user/userdashboard');
+      }
+
+
+
+console.log(response.data);
+
+    } catch (err) {
+      console.error(err);
       alert('Invalid credentials');
-      return;
+    } finally {
+      setFormData({
+        email: '',
+        password: ''
+      });
     }
 
-    console.log(formData);
-    setFormData({
-      email: '',
-      password: ''
-    });
+
+
+
+
   };
 
   return (
@@ -118,8 +138,8 @@ const Login = () => {
 
         {/* Right Side - Image */}
         <div className="hidden md:block md:w-1/2 bg-gradient-to-br from-blue-400 to-purple-500 relative overflow-hidden">
-          <img 
-            src="https://static.vecteezy.com/system/resources/previews/003/689/228/non_2x/online-registration-or-sign-up-login-for-account-on-smartphone-app-user-interface-with-secure-password-mobile-application-for-ui-web-banner-access-cartoon-people-illustration-vector.jpg" 
+          <img
+            src="https://static.vecteezy.com/system/resources/previews/003/689/228/non_2x/online-registration-or-sign-up-login-for-account-on-smartphone-app-user-interface-with-secure-password-mobile-application-for-ui-web-banner-access-cartoon-people-illustration-vector.jpg"
             alt="Login illustration"
             className="w-full h-full object-cover"
           />
