@@ -1,68 +1,41 @@
-import React from 'react';
+import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
-import axios from 'axios';
+import { AuthContext } from '../../context/AuthContext';
 
 const Login = () => {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  });
+  const { login } = useContext(AuthContext); // get login function from context
+  const [formData, setFormData] = useState({ email: '', password: '' });
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData);
+
     try {
-      const response = await axios.post("http://localhost:7777/loanpe/users/login",
-        formData,
-        {
-          withCredentials: true
-        }
-      )
+      const user = await login(formData.email, formData.password); // login returns full user object
 
-      const { user } = response.data;
-      const role = user.role;
-
-      localStorage.setItem('role',role);
-
-      if (role === 'admin') {
+      // Navigate based on role directly from user object
+      if (user.role === 'admin') {
         navigate('/admin/admindashboard');
       } else {
         navigate('/user/userdashboard');
       }
 
-
-
-console.log(response.data);
-
     } catch (err) {
       console.error(err);
       alert('Invalid credentials');
     } finally {
-      setFormData({
-        email: '',
-        password: ''
-      });
+      setFormData({ email: '', password: '' });
     }
-
-
-
-
-
   };
 
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-blue-500 to-purple-600 p-4 flex items-center justify-center">
-      {/* Login Card - now using full height on mobile and constrained on larger screens */}
+      {/* Login Card */}
       <div className="flex flex-col md:flex-row w-full h-full md:h-auto md:max-h-[90vh] md:max-w-4xl bg-white rounded-none md:rounded-xl shadow-2xl overflow-hidden">
         {/* Left Side - Form */}
         <div className="w-full md:w-1/2 p-8 sm:p-12 overflow-y-auto">
@@ -80,7 +53,7 @@ console.log(response.data);
                 placeholder="Enter your email"
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                 required
-                name='email'
+                name="email"
                 value={formData.email}
                 onChange={handleChange}
               />
@@ -95,7 +68,7 @@ console.log(response.data);
                 type="password"
                 placeholder="Enter your password"
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-                name='password'
+                name="password"
                 value={formData.password}
                 onChange={handleChange}
                 required
@@ -129,7 +102,7 @@ console.log(response.data);
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
               Don't have an account?{' '}
-              <Link to={'/signup'} className="font-medium text-purple-600 hover:text-purple-500">
+              <Link to="/signup" className="font-medium text-purple-600 hover:text-purple-500">
                 Sign up
               </Link>
             </p>
