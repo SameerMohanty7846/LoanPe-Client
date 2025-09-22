@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { AuthContext } from '../../context/AuthContext';
 
 export const navbarMenuItems = {
   admin: [
@@ -19,22 +20,23 @@ export const navbarMenuItems = {
 
 const CommonSidebar = ({ userType }) => {
   const location = useLocation();
+  const { logout } = useContext(AuthContext); // use AuthContext
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const menuItems = navbarMenuItems[userType] || navbarMenuItems.user;
 
-  const handleLogout = () => {
-    // Clear localStorage
-    localStorage.removeItem('token');
-    localStorage.removeItem('role');
-    localStorage.removeItem('userData');
 
-    // Redirect to login page
-    navigate('/login');
 
-    // Close mobile menu if open
-    setMobileMenuOpen(false);
+  const handleLogout = async () => {
+    try {
+      await logout(); // call logout from context
+      setMobileMenuOpen(false); // close mobile menu
+    } catch (err) {
+      console.error('Logout failed', err);
+    }
   };
+
+
 
   // Function to handle menu item clicks
   const handleMenuItemClick = () => {
@@ -78,8 +80,8 @@ const CommonSidebar = ({ userType }) => {
       {/* Sidebar */}
       <div className={`${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} sm:translate-x-0 fixed inset-y-0 left-0 z-40 w-64 bg-white shadow-lg transform transition-transform duration-200 ease-in-out flex flex-col`}>
         <div className="flex items-center justify-center h-16 px-4 border-b border-gray-200">
-          <Link 
-            to="/" 
+          <Link
+            to="/"
             className="text-xl font-bold text-purple-600"
             onClick={handleMenuItemClick}
           >

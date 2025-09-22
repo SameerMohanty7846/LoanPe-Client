@@ -1,22 +1,27 @@
-import React from 'react'
-import { Navigate } from 'react-router-dom';
+import React, { useContext } from 'react';
+import { Navigate, Outlet } from 'react-router-dom';
+import { AuthContext } from '../../context/AuthContext';
 
+const PrivateRoute = ({ role }) => {
+  const { user, loading } = useContext(AuthContext);
 
-// It's component not a function so we will return a component so we use Navigate to return the component instead of useNavigateHook 
-const PrivateRoute = ({ role, children }) => {
-    const userRole = localStorage.getItem('role');
-    if (!userRole) {
-        alert('Please login to access this page.');
-        return <Navigate to='/login' />
-    }
-    if (userRole != role) {
-        alert('Please login to access this page.');
+  // While fetching current user, show nothing (or a spinner)
+  if (loading) return <div>Loading...</div>;
 
-        return <Navigate to='/login' />
-    }
+  // If not logged in
+  if (!user) {
+    alert('Please login to access this page.');
+    return <Navigate to="/login" replace />;
+  }
 
+  // If role is required and doesn't match
+  if (role && user.role !== role) {
+    alert('You are not authorized to access this page.');
+    return <Navigate to="/login" replace />;
+  }
 
-    return children;
-}
+  // All checks passed, render nested routes
+  return <Outlet />;
+};
 
-export default PrivateRoute
+export default PrivateRoute;
