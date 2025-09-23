@@ -1,15 +1,25 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
 import axios from 'axios';
+import CustomModal from '../common/CustomModal'; // ✅ import your modal
+
 const SignUp = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
     password: '',
-    role:'user'
+    role: 'user'
   });
+
+  // ✅ modal states
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalData, setModalData] = useState({
+    title: '',
+    message: '',
+    color: 'green'
+  });
+
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -22,23 +32,46 @@ const SignUp = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-   try{
-     const response=await axios.post("http://localhost:7777/loanpe/users/register",
-      formData,
-      {withCredentials:true}
-    )
+    try {
+      const response = await axios.post(
+        "http://localhost:7777/loanpe/users/register",
+        formData,
+        { withCredentials: true }
+      );
 
-    console.log("Registration Successfully:",response.data);
-    alert('Account created successfully!');
-    navigate('/login')
+      console.log("Registration Successfully:", response.data);
 
-   }catch(error){
-     console.error("Registration Failed ",error);
-     alert(error.response ?.data ?.message || 'Something went wrong')
-   }
+      // ✅ show success modal
+      setModalData({
+        title: 'Account Created',
+        message: 'Your account has been created successfully!',
+        color: 'green'
+      });
+      setModalOpen(true);
 
+      // ✅ auto navigate after 2.5s
+      setTimeout(() => navigate('/login'), 2500);
 
-   
+    } catch (error) {
+      console.error("Registration Failed ", error);
+
+      // ✅ show error modal
+      setModalData({
+        title: 'Registration Failed',
+        message: error.response?.data?.message || 'Something went wrong',
+        color: 'red'
+      });
+      setModalOpen(true);
+
+      // ✅ auto close modal after 2.5s
+      setTimeout(() => setModalOpen(false), 2500);
+    }
+  };
+
+  // ✅ handle modal button press
+  const handleContinue = () => {
+    if (modalData.color === 'green') navigate('/login');
+    else setModalOpen(false);
   };
 
   return (
@@ -152,6 +185,16 @@ const SignUp = () => {
           />
         </div>
       </div>
+
+      {/* ✅ Use the CustomModal */}
+      <CustomModal
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+        title={modalData.title}
+        message={modalData.message}
+        color={modalData.color}
+        onContinue={handleContinue}
+      />
     </div>
   );
 };

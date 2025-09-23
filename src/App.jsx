@@ -14,6 +14,8 @@ import ManageOffers from './components/pages/ManageOffers'
 import Login from './components/pages/Login'
 import SignUp from './components/pages/SignUp'
 import AuthLayout from './components/layout/AuthLayout'
+import LoanDetailsPage from './components/pages/LoanDetailsPage'
+import LoanApplicationPage from './components/pages/LoanApplicationPage'
 const App = () => {
   return (
     <BrowserRouter>
@@ -46,34 +48,39 @@ const App = () => {
           <Route path="/signup" element={<SignUp />} />
 
         </Route> */}
-      
-          {/* User Routes */}
-          <Route element={<PrivateRoute role="user" />}>
-            <Route element={<MainLayout />}>
-              <Route path="/user/userdashboard" element={<UserDashboard />} />
-              <Route path="/user/loans" element={<ViewLoans />} />
-              <Route path="/user/loanhistory" element={<LoanHistory />} />
-              <Route path="/user/emicalculator" element={<EmiCalculator />} />
-              <Route path="/user/offers" element={<Offers />} />
-            </Route>
-          </Route>
 
-          {/* Admin Routes */}
-          <Route element={<PrivateRoute role="admin" />}>
-            <Route element={<MainLayout />}>
-              <Route path="/admin/admindashboard" element={<AdminDashboard />} />
-              <Route path="/admin/view-and-update-loans" element={<ViewAndUpdateLoans />} />
-              <Route path="/admin/view-loan-applications" element={<ViewLoanApplications />} />
-              <Route path="/admin/manage-offers" element={<ManageOffers />} />
-            </Route>
-          </Route>
+        {/* User Routes */}
+        <Route element={<PrivateRoute role="user" />}>
+          <Route element={<MainLayout />}>
+            <Route path="/user/userdashboard" element={<UserDashboard />} />
+            <Route path="/user/loans" element={<ViewLoans />} />
 
-          {/* Public Routes */}
-          <Route element={<AuthLayout />}>
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<SignUp />} />
+            <Route path="/user/loans/details/:id" element={<LoanDetailsPage />} />
+            <Route path="/user/loans/application/:id" element={<LoanApplicationPage />} />
+
+
+            <Route path="/user/loanhistory" element={<LoanHistory />} />
+            <Route path="/user/emicalculator" element={<EmiCalculator />} />
+            <Route path="/user/offers" element={<Offers />} />
           </Route>
-        
+        </Route>
+
+        {/* Admin Routes */}
+        <Route element={<PrivateRoute role="admin" />}>
+          <Route element={<MainLayout />}>
+            <Route path="/admin/admindashboard" element={<AdminDashboard />} />
+            <Route path="/admin/view-and-update-loans" element={<ViewAndUpdateLoans />} />
+            <Route path="/admin/view-loan-applications" element={<ViewLoanApplications />} />
+            <Route path="/admin/manage-offers" element={<ManageOffers />} />
+          </Route>
+        </Route>
+
+        {/* Public Routes */}
+        <Route element={<AuthLayout />}>
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<SignUp />} />
+        </Route>
+
 
 
 

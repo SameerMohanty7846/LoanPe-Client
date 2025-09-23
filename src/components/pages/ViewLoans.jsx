@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import LoanCard from '../common/LoanCard '
 
 const SkeletonCard = () => (
   <div className="bg-white rounded-xl shadow-md animate-pulse overflow-hidden border border-gray-100 p-6">
@@ -26,7 +27,7 @@ const SkeletonCard = () => (
 );
 
 const ViewLoans = () => {
-  const [loans, setLoans] = useState([]); 
+  const [loans, setLoans] = useState([]);
   const [selectedLoan, setSelectedLoan] = useState(null);
   const [showApplyModal, setShowApplyModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
@@ -37,7 +38,9 @@ const ViewLoans = () => {
       try {
         const res = await axios.get('http://localhost:7777/loanpe/loans/allloans');
         if (res.data.status === 'success') {
-          const mappedLoans = res.data.data.map((loan) => ({
+          await new Promise(resolve => setTimeout(resolve, 800));
+
+          const mappedLoans = res.data.data.map(loan => ({
             id: loan._id,
             name: loan.productName,
             interestRate: `${loan.interestRate}%`,
@@ -46,6 +49,7 @@ const ViewLoans = () => {
             eligibility: loan.eligibilityCriteria,
             tag: loan.isActive ? 'Active' : 'Inactive'
           }));
+
           setLoans(mappedLoans);
         }
       } catch (err) {
@@ -54,15 +58,16 @@ const ViewLoans = () => {
         setLoading(false);
       }
     };
+
     fetchLoans();
   }, []);
 
-  const openApplyModal = (loan) => {
+  const openApplyModal = loan => {
     setSelectedLoan(loan);
     setShowApplyModal(true);
   };
 
-  const openDetailsModal = (loan) => {
+  const openDetailsModal = loan => {
     setSelectedLoan(loan);
     setShowDetailsModal(true);
   };
@@ -87,63 +92,15 @@ const ViewLoans = () => {
         {/* Loan Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {loading
-            ? // Show skeletons while loading
-              [...Array(6)].map((_, i) => <SkeletonCard key={i} />)
-            : loans.map((loan) => (
-              <div 
-                key={loan.id} 
-                className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200 overflow-hidden border border-gray-100"
-              >
-                <div className="p-6">
-                  {/* Loan Header */}
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h3 className="text-xl font-bold text-gray-800">{loan.name}</h3>
-                      <span className="text-sm text-purple-600 font-medium">{loan.tag}</span>
-                    </div>
-                    <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
-                      <span className="text-white font-bold text-sm">
-                        {loan.name.charAt(0)}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Interest Rate and Term */}
-                  <div className="grid grid-cols-2 gap-4 mb-4">
-                    <div className="bg-blue-50 p-3 rounded-lg">
-                      <p className="text-xs text-gray-600">Interest Rate</p>
-                      <p className="text-lg font-bold text-blue-600">{loan.interestRate}</p>
-                    </div>
-                    <div className="bg-purple-50 p-3 rounded-lg">
-                      <p className="text-xs text-gray-600">Loan Term</p>
-                      <p className="text-md font-semibold text-purple-600">{loan.term}</p>
-                    </div>
-                  </div>
-
-                  {/* Description */}
-                  <div className="mb-4">
-                    <p className="text-sm font-medium text-gray-700 mb-2">Description:</p>
-                    <p className="text-sm text-gray-600">{loan.description}</p>
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="flex space-x-3">
-                    <button
-                      onClick={() => openApplyModal(loan)}
-                      className="flex-1 bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 text-white text-center font-medium py-3 px-4 rounded-lg transition-all duration-200"
-                    >
-                      Apply Now
-                    </button>
-                    <button
-                      onClick={() => openDetailsModal(loan)}
-                      className="flex-1 border border-gray-300 hover:border-purple-400 hover:bg-purple-50 text-gray-700 text-center font-medium py-3 px-4 rounded-lg transition-all duration-200"
-                    >
-                      Details
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
+            ? [...Array(6)].map((_, i) => <SkeletonCard key={i} />)
+            : loans.map(loan => (
+                <LoanCard
+                  key={loan.id}
+                  loan={loan}
+                  onApply={openApplyModal}
+                  onDetails={openDetailsModal}
+                />
+              ))}
         </div>
 
         {/* Apply Modal */}
@@ -186,9 +143,10 @@ const ViewLoans = () => {
               <p className="text-gray-600 mb-2"><strong>Interest Rate:</strong> {selectedLoan.interestRate}</p>
               <p className="text-gray-600 mb-2"><strong>Term:</strong> {selectedLoan.term}</p>
               <p className="text-gray-600 mb-4"><strong>Description:</strong> {selectedLoan.description}</p>
-              <button 
-                onClick={() => { closeModals(); openApplyModal(selectedLoan); }} 
-                className="w-full bg-gradient-to-r from-purple-600 to-blue-500 text-white py-2 rounded-lg font-medium">
+              <button
+                onClick={() => { closeModals(); openApplyModal(selectedLoan); }}
+                className="w-full bg-gradient-to-r from-purple-600 to-blue-500 text-white py-2 rounded-lg font-medium"
+              >
                 Apply Now
               </button>
             </div>
