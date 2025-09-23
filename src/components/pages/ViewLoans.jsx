@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import LoanCard from '../common/LoanCard '
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import LoanCard from "../common/LoanCard ";
+import { useNavigate } from "react-router-dom";
 
 const SkeletonCard = () => (
   <div className="bg-white rounded-xl shadow-md animate-pulse overflow-hidden border border-gray-100 p-6">
@@ -28,32 +29,28 @@ const SkeletonCard = () => (
 
 const ViewLoans = () => {
   const [loans, setLoans] = useState([]);
-  const [selectedLoan, setSelectedLoan] = useState(null);
-  const [showApplyModal, setShowApplyModal] = useState(false);
-  const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchLoans = async () => {
       try {
-        const res = await axios.get('http://localhost:7777/loanpe/loans/allloans');
-        if (res.data.status === 'success') {
-          await new Promise(resolve => setTimeout(resolve, 800));
-
-          const mappedLoans = res.data.data.map(loan => ({
+        const res = await axios.get("http://localhost:7777/loanpe/loans/allloans");
+        if (res.data.status === "success") {
+          await new Promise((resolve) => setTimeout(resolve, 800)); // optional delay for skeleton
+          const mappedLoans = res.data.data.map((loan) => ({
             id: loan._id,
             name: loan.productName,
             interestRate: `${loan.interestRate}%`,
             term: `${loan.duration} months`,
             description: loan.description,
             eligibility: loan.eligibilityCriteria,
-            tag: loan.isActive ? 'Active' : 'Inactive'
+            tag: loan.isActive ? "Active" : "Inactive",
           }));
-
           setLoans(mappedLoans);
         }
       } catch (err) {
-        console.error('Error fetching loans:', err);
+        console.error("Error fetching loans:", err);
       } finally {
         setLoading(false);
       }
@@ -62,20 +59,12 @@ const ViewLoans = () => {
     fetchLoans();
   }, []);
 
-  const openApplyModal = loan => {
-    setSelectedLoan(loan);
-    setShowApplyModal(true);
+  const handleDetailsClick = (loanId) => {
+    navigate(`/user/loans/details/${loanId}`);
   };
 
-  const openDetailsModal = loan => {
-    setSelectedLoan(loan);
-    setShowDetailsModal(true);
-  };
-
-  const closeModals = () => {
-    setShowApplyModal(false);
-    setShowDetailsModal(false);
-    setSelectedLoan(null);
+  const handleApplyClick = (loanId) => {
+    navigate(`/user/loans/application/${loanId}`);
   };
 
   return (
@@ -93,65 +82,15 @@ const ViewLoans = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {loading
             ? [...Array(6)].map((_, i) => <SkeletonCard key={i} />)
-            : loans.map(loan => (
+            : loans.map((loan) => (
                 <LoanCard
                   key={loan.id}
                   loan={loan}
-                  onApply={openApplyModal}
-                  onDetails={openDetailsModal}
+                  onDetails={() => handleDetailsClick(loan.id)}
+                  onApply={() => handleApplyClick(loan.id)}
                 />
               ))}
         </div>
-
-        {/* Apply Modal */}
-        {showApplyModal && selectedLoan && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl max-w-lg w-full p-6 shadow-xl relative">
-              <button onClick={closeModals} className="absolute top-3 right-3 text-gray-500 hover:text-gray-800">
-                ✕
-              </button>
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">Apply for {selectedLoan.name}</h2>
-              <form className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Full Name</label>
-                  <input type="text" className="w-full border rounded-lg p-2 mt-1" placeholder="Enter your name" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Email</label>
-                  <input type="email" className="w-full border rounded-lg p-2 mt-1" placeholder="Enter your email" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Loan Amount</label>
-                  <input type="number" className="w-full border rounded-lg p-2 mt-1" placeholder="Enter amount" />
-                </div>
-                <button className="w-full bg-gradient-to-r from-purple-600 to-blue-500 text-white py-2 rounded-lg font-medium">
-                  Submit Application
-                </button>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* Details Modal */}
-        {showDetailsModal && selectedLoan && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl max-w-lg w-full p-6 shadow-xl relative">
-              <button onClick={closeModals} className="absolute top-3 right-3 text-gray-500 hover:text-gray-800">
-                ✕
-              </button>
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">{selectedLoan.name} Details</h2>
-              <p className="text-gray-600 mb-2"><strong>Interest Rate:</strong> {selectedLoan.interestRate}</p>
-              <p className="text-gray-600 mb-2"><strong>Term:</strong> {selectedLoan.term}</p>
-              <p className="text-gray-600 mb-4"><strong>Description:</strong> {selectedLoan.description}</p>
-              <button
-                onClick={() => { closeModals(); openApplyModal(selectedLoan); }}
-                className="w-full bg-gradient-to-r from-purple-600 to-blue-500 text-white py-2 rounded-lg font-medium"
-              >
-                Apply Now
-              </button>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
