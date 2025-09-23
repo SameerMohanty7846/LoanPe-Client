@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import logo from '../../assets/LoanPe Logo Design (3).png';
 
 export const headerMenuItems = {
   admin: [
@@ -35,60 +36,51 @@ const Header = () => {
     <header className="bg-white shadow-sm z-50 fixed top-0 left-0 right-0">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Logo and Hamburger for mobile */}
+          {/* Mobile hamburger */}
           <div className="flex items-center md:hidden">
             <button
               type="button"
               className="inline-flex items-center justify-center p-2 rounded-md bg-purple-50 text-purple-700 hover:bg-purple-100 hover:text-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all duration-200 shadow-sm"
-              aria-expanded="false"
+              aria-expanded={mobileMenuOpen}
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
               <span className="sr-only">Open main menu</span>
-              {/* Hamburger icon */}
               <svg
-                className={`${mobileMenuOpen ? 'hidden' : 'block'} h-5 w-5`}
+                className={`${mobileMenuOpen ? 'hidden' : 'block'} h-6 w-6`}
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
                 aria-hidden="true"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
               </svg>
-              {/* Close icon */}
               <svg
-                className={`${mobileMenuOpen ? 'block' : 'hidden'} h-5 w-5`}
+                className={`${mobileMenuOpen ? 'block' : 'hidden'} h-6 w-6`}
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
                 aria-hidden="true"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M6 18L18 6M6 6l12 12"
-                />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
 
-          {/* Logo - Centered on mobile, normal position on desktop */}
-          <div className="flex flex-shrink-0 md:ml-0 mx-auto md:mx-0">
+          {/* Logo */}
+          <div className="flex flex-shrink-0 items-center">
             <Link to="/">
-              <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent">
-                YourLogo
-              </span>
+              <img
+                src={logo}
+                alt="LoanPe Logo"
+                className="h-12 w-auto sm:h-14 md:h-16"
+                style={{ objectFit: 'contain' }}
+              />
             </Link>
           </div>
 
-          {/* Centered Navigation Links - Desktop */}
+          {/* Desktop menu */}
           <nav className="hidden md:flex md:items-center md:justify-center md:flex-1">
             <div className="flex space-x-8">
               {menuItems.map((item) => (
@@ -107,7 +99,7 @@ const Header = () => {
             </div>
           </nav>
 
-          {/* Right side - User profile and notifications */}
+          {/* Right icons */}
           <div className="flex items-center">
             <button
               type="button"
@@ -131,14 +123,13 @@ const Header = () => {
               </svg>
             </button>
 
-            {/* Profile dropdown */}
+            {/* Profile */}
             <div className="ml-3 relative">
               <div>
                 <button
                   type="button"
                   className="flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors duration-200"
                   id="user-menu"
-                  aria-expanded="false"
                   aria-haspopup="true"
                 >
                   <span className="sr-only">Open user menu</span>
@@ -151,7 +142,7 @@ const Header = () => {
           </div>
         </div>
 
-        {/* Mobile menu, show/hide based on menu state */}
+        {/* Mobile menu */}
         <div className={`md:hidden ${mobileMenuOpen ? 'block' : 'hidden'} transition-all duration-300 ease-in-out`}>
           <div className="pt-2 pb-3 space-y-1 bg-white shadow-lg rounded-b-lg border-t border-gray-100">
             {menuItems.map((item) => (
@@ -168,8 +159,8 @@ const Header = () => {
                 {item.label}
               </Link>
             ))}
-            
-            {/* Logout option in mobile menu */}
+
+            {/* Logout */}
             <div className="border-t border-gray-200 mt-2 pt-2">
               <button
                 onClick={handleLogout}

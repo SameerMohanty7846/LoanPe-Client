@@ -1,6 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
+import CustomModal from '../common/CustomModal';
 
 export const navbarMenuItems = {
   admin: [
@@ -20,32 +21,29 @@ export const navbarMenuItems = {
 
 const CommonSidebar = ({ userType }) => {
   const location = useLocation();
-  const { logout } = useContext(AuthContext); // use AuthContext
+  const { logout } = useContext(AuthContext);
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [logoutModalOpen, setLogoutModalOpen] = useState(false); // modal state
   const menuItems = navbarMenuItems[userType] || navbarMenuItems.user;
-
-
 
   const handleLogout = async () => {
     try {
-      await logout(); // call logout from context
-      setMobileMenuOpen(false); // close mobile menu
+      await logout();
+      setLogoutModalOpen(false);
+      navigate('/login'); // redirect after logout
     } catch (err) {
       console.error('Logout failed', err);
     }
   };
 
-
-
-  // Function to handle menu item clicks
   const handleMenuItemClick = () => {
     setMobileMenuOpen(false);
   };
 
   return (
     <>
-      {/* Mobile menu button (only shows on small screens) */}
+      {/* Mobile menu button */}
       <div className="sm:hidden fixed top-4 left-4 z-50">
         <button
           type="button"
@@ -54,23 +52,11 @@ const CommonSidebar = ({ userType }) => {
         >
           <span className="sr-only">Open sidebar</span>
           {mobileMenuOpen ? (
-            <svg
-              className="h-5 w-5"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
+            <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           ) : (
-            <svg
-              className="h-5 w-5"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
+            <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           )}
@@ -80,14 +66,11 @@ const CommonSidebar = ({ userType }) => {
       {/* Sidebar */}
       <div className={`${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} sm:translate-x-0 fixed inset-y-0 left-0 z-40 w-64 bg-white shadow-lg transform transition-transform duration-200 ease-in-out flex flex-col`}>
         <div className="flex items-center justify-center h-16 px-4 border-b border-gray-200">
-          <Link
-            to="/"
-            className="text-xl font-bold text-purple-600"
-            onClick={handleMenuItemClick}
-          >
+          <Link to="/" className="text-xl font-bold text-purple-600" onClick={handleMenuItemClick}>
             MyApp
           </Link>
         </div>
+
         <div className="flex-1 overflow-y-auto">
           <nav className="px-2 py-4">
             <div className="space-y-1">
@@ -95,17 +78,13 @@ const CommonSidebar = ({ userType }) => {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`group flex items-center px-2 py-3 text-sm font-medium rounded-md transition-colors duration-200 ${location.pathname === item.path
-                    ? 'bg-purple-50 text-purple-700'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                    }`}
+                  className={`group flex items-center px-2 py-3 text-sm font-medium rounded-md transition-colors duration-200 ${
+                    location.pathname === item.path ? 'bg-purple-50 text-purple-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                  }`}
                   onClick={handleMenuItemClick}
                 >
                   <svg
-                    className={`mr-3 h-5 w-5 transition-colors duration-200 ${location.pathname === item.path
-                      ? 'text-purple-500'
-                      : 'text-gray-400 group-hover:text-gray-500'
-                      }`}
+                    className={`mr-3 h-5 w-5 transition-colors duration-200 ${location.pathname === item.path ? 'text-purple-500' : 'text-gray-400 group-hover:text-gray-500'}`}
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"
@@ -123,22 +102,11 @@ const CommonSidebar = ({ userType }) => {
         {/* Logout Button */}
         <div className="p-4 border-t border-gray-200">
           <button
-            onClick={handleLogout}
+            onClick={() => setLogoutModalOpen(true)}
             className="w-full flex items-center justify-center px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 hover:text-red-700 rounded-md transition-colors duration-200"
           >
-            <svg
-              className="mr-3 h-5 w-5 text-red-400"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-              />
+            <svg className="mr-3 h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
             Logout
           </button>
@@ -146,12 +114,17 @@ const CommonSidebar = ({ userType }) => {
       </div>
 
       {/* Overlay for mobile */}
-      {mobileMenuOpen && (
-        <div
-          className="sm:hidden fixed inset-0 bg-gray-600 bg-opacity-50 z-30"
-          onClick={() => setMobileMenuOpen(false)}
-        ></div>
-      )}
+      {mobileMenuOpen && <div className="sm:hidden fixed inset-0 bg-gray-600 bg-opacity-50 z-30" onClick={() => setMobileMenuOpen(false)}></div>}
+
+      {/* Logout Confirmation Modal */}
+      <CustomModal
+        open={logoutModalOpen}
+        onOpenChange={setLogoutModalOpen}
+        title="Confirm Logout"
+        message="Are you sure you want to logout?"
+        color="red"
+        onContinue={handleLogout}
+      />
     </>
   );
 };
