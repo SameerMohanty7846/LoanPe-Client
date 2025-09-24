@@ -23,9 +23,9 @@ const FormField = ({
   required = false,
 }) => {
   return (
-    <div className="space-y-1">
+    <div className="flex flex-col space-y-2 w-full">
       {label && (
-        <Label htmlFor={id} className="text-sm font-medium text-gray-700">
+        <Label htmlFor={id} className="text-sm font-semibold text-gray-800">
           {label}
         </Label>
       )}
@@ -36,7 +36,9 @@ const FormField = ({
         value={value}
         onChange={onChange}
         required={required}
-        className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+        className="w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm 
+                   focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 
+                   placeholder-gray-400 text-gray-900 transition-all duration-200"
       />
     </div>
   );
