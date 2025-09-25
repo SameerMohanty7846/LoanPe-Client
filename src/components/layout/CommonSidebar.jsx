@@ -19,13 +19,16 @@ export const navbarMenuItems = {
   ]
 };
 
-const CommonSidebar = ({ userType }) => {
+const CommonSidebar = () => {
   const location = useLocation();
-  const { logout } = useContext(AuthContext);
+  const { user, logout } = useContext(AuthContext); // ✅ get user + logout from AuthContext
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [logoutModalOpen, setLogoutModalOpen] = useState(false); // modal state
-  const menuItems = navbarMenuItems[userType] || navbarMenuItems.user;
+  const [logoutModalOpen, setLogoutModalOpen] = useState(false);
+
+  // pick role from user (fallback to "user")
+  const userType = user?.role || 'user';
+  const menuItems = navbarMenuItems[userType];
 
   const handleLogout = async () => {
     try {

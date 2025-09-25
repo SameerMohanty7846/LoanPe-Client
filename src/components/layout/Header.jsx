@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import logo from '../../assets/LoanPe Logo Design (3).png';
 import {
@@ -7,6 +7,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'; // ShadCN dropdown components
+import { AuthContext } from '@/context/AuthContext';
+import CustomModal from '../common/CustomModal';
 
 export const headerMenuItems = {
   admin: [
@@ -25,17 +27,33 @@ export const headerMenuItems = {
 };
 
 const Header = () => {
+  const { user, logout } = useContext(AuthContext);
+
   const location = useLocation();
   const navigate = useNavigate();
-  const role = localStorage.getItem('role') || 'user';
+  const role = user?.role || 'user';
   const menuItems = headerMenuItems[role] || headerMenuItems.user;
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('role');
-    localStorage.removeItem('userData');
-    navigate('/login');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [logoutModalOpen, setLogoutModalOpen] = useState(false);
+
+  // Dynamic initials for profile button
+  const initials = user?.name
+    ? user.name
+        .split(' ')
+        .map((n) => n[0])
+        .join('')
+        .toUpperCase()
+    : 'U';
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      setLogoutModalOpen(false);
+      navigate('/login');
+    } catch (err) {
+      console.log('Logout Failed', err);
+    }
   };
 
   const handleAccountSettings = () => {
@@ -61,7 +79,12 @@ const Header = () => {
                 viewBox="0 0 24 24"
                 stroke="currentColor"
               >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
               </svg>
               <svg
                 className={`${mobileMenuOpen ? 'block' : 'hidden'} h-6 w-6`}
@@ -70,7 +93,12 @@ const Header = () => {
                 viewBox="0 0 24 24"
                 stroke="currentColor"
               >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </div>
@@ -78,7 +106,11 @@ const Header = () => {
           {/* Logo */}
           <div className="flex-shrink-0">
             <Link to="/">
-              <img src={logo} alt="LoanPe Logo" className="h-12 w-auto sm:h-14 md:h-16" />
+              <img
+                src={logo}
+                alt="LoanPe Logo"
+                className="h-12 w-auto sm:h-14 md:h-16"
+              />
             </Link>
           </div>
 
@@ -105,21 +137,29 @@ const Header = () => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="h-8 w-8 rounded-full bg-gradient-to-r from-purple-500 to-blue-400 flex items-center justify-center text-white font-medium shadow-md hover:shadow-lg transition-shadow focus:outline-none">
-                  JD
+                  {initials}
                 </button>
               </DropdownMenuTrigger>
 
-              {/* Removed Portal → Render inline to avoid shaking */}
+              {/* Render inline */}
               <DropdownMenuContent className="w-48 mt-2 absolute right-0 bg-white shadow-lg rounded-md border border-gray-200">
-                <DropdownMenuItem onClick={handleAccountSettings}>Account Settings</DropdownMenuItem>
-                <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
+                <DropdownMenuItem onClick={handleAccountSettings}>
+                  Account Settings
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setLogoutModalOpen(true)}>
+                  Logout
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         </div>
 
         {/* Mobile Menu */}
-        <div className={`md:hidden ${mobileMenuOpen ? 'block' : 'hidden'} transition-all duration-300 ease-in-out`}>
+        <div
+          className={`md:hidden ${
+            mobileMenuOpen ? 'block' : 'hidden'
+          } transition-all duration-300 ease-in-out`}
+        >
           <div className="pt-2 pb-3 space-y-1 bg-white shadow-lg rounded-b-lg border-t border-gray-100">
             {menuItems.map((item) => (
               <Link
@@ -138,6 +178,16 @@ const Header = () => {
           </div>
         </div>
       </div>
+
+      {/* Logout Confirmation Modal */}
+      <CustomModal
+        open={logoutModalOpen}
+        onOpenChange={setLogoutModalOpen}
+        title="Confirm Logout"
+        message="Are you sure you want to logout?"
+        color="red"
+        onContinue={handleLogout}
+      />
     </header>
   );
 };
